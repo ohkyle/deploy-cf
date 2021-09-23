@@ -1,5 +1,11 @@
 ---
 resource_types:
+- name: config
+  type: git
+  source:
+    uri: ((pipeline-repo))
+    private_key: ((github-private_key))
+    branch: main
 - name: pivnet
   type: docker-image
   source:
@@ -29,9 +35,17 @@ jobs:
       image: platform-automation-image
       file: platform-automation-tasks/tasks/test.yml
     - get: config
+    - task: prepare-tasks-with-secrets
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/prepare-tasks-with-secrets.yml
+      input_mapping:
+        tasks: platform-automation-tasks
+      output_mapping:
+        tasks: platform-automation-tasks
+      params:
+        CONFIG_PATHS: config
     - task: download-product
      image: platform-automation-image
       file: platform-automation-tasks/tasks/download-product.yml
       params:
         CONFIG_FILE: download-ops-manager.yml
- 
